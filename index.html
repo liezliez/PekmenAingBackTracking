@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<head>
+	<title>Pacman menggunakan Backtracking</title>
+	<link rel="stylesheet" type="text/css" href="StyleSheet.css">
+	<p>Gunakan Panah untuk menggerakan pacman, Tekan B untuk bantuan Backtracking</p>
+	<h1 id="score"></h1>	
+</head>
+<body>
+	<!-- HTML SINI GAN -->
+	<div id='board'> </div>
+	<button  id="butMap1" class="button" onclick="drawMap1()"> Map1 </button>
+	<button  id="butMap2" class="button" onclick="drawMap2()"> Map2 </button>
+	<button  id="butMap3" class="button" onclick="drawMap3()"> Map3 </button>
+
+</body>
+<script>
+	// ------- Test Log -----------
+	function myFunction(){
+		console.log("Bejir");
+	}
+
+	// -------- VARIABEL POSISI PACMAN ---------
+
+	pacman = {
+		baris: 1,
+		kolom: 1
+	}
+
+	// -------- ARRAY MAP ----------
+
+	const map3 = [ 
+		[1,1,1,1,1,1,1,1,1,1,1,1,1], 
+		[1,5,2,2,2,2,1,2,2,2,2,2,1], 
+		[1,2,1,1,1,2,1,2,1,1,1,2,1], 
+		[1,2,1,2,2,2,2,2,2,2,1,2,1], 
+		[1,2,1,2,1,1,1,1,1,2,1,2,1], 
+		[1,2,1,2,2,2,1,2,2,2,1,2,1], 
+		[1,2,1,1,2,1,1,1,2,1,1,2,1], 
+		[1,2,2,2,2,2,1,2,2,2,2,2,1], 
+		[1,1,1,1,1,1,1,1,1,1,1,1,1]
+	]
+
+	const map2 = [
+		[1,1,1,1,1,1,1,1,1,1,1,1,1],
+		[1,5,2,2,2,2,2,2,2,2,2,2,1],
+		[1,2,2,2,2,2,2,2,1,1,2,2,1],
+		[1,2,2,2,2,2,2,1,1,1,1,1,1],
+		[1,1,1,1,1,1,1,1,1,1,1,1,1]
+
+	]
+
+	const map1 = [ 
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
+		[1,5,2,2,2,2,2,2,1,2,1,1,2,1], 
+		[1,2,1,2,1,2,1,2,1,2,2,2,2,1], 
+		[1,2,1,1,1,1,1,1,1,1,2,1,1,1], 
+		[1,2,2,2,2,2,2,2,2,2,2,2,2,1], 
+		[1,1,1,2,1,1,1,1,1,1,2,1,1,1], 
+		[1,2,1,2,1,2,1,1,2,1,2,1,2,1], 
+		[1,2,2,2,2,2,1,1,2,2,2,2,2,1], 
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+	]
+
+	// ----------- NOTE  -----------
+	// 1 => <div class='tembok'></div>
+	// 2 => <div class='koin'></div>
+	// 3 => <div class='ground'></div>
+	// 4 => <div class='setan'></div>
+	// 5 => <div class='pacman'></div>
+	// 6 => <div class='terlewati'></div>
+	// 7 => <div class='cabang'></div>
+	// map = [ 1, 2, 3 ] array per elemen
+
+	// ------ VARIABEL GLOBAL -----------
+
+	var score = 0;
+	var mapNow;
+	var koinNow;
+	var status = true;
+
+
+
+	//------- Function Visualisasi & Posisi Array Map ----------
+
+	function resetPos(){
+		pacman.baris = 1;
+ 		pacman.kolom = 1;			
+	}
+
+ 	function drawMap1(){
+ 		score = 0;
+ 		status = false;
+ 		resetPos();
+ 		mapNow = map1;
+ 		drawboard();	
+ 	}
+
+ 	function drawMap2(){
+ 		score= 0;
+ 		status = false;
+ 		resetPos();
+ 		mapNow = map2;
+ 		drawboard();
+ 	}
+
+ 	function drawMap3(){
+ 		score = 0;
+ 		status = false;
+ 		resetPos();
+ 		mapNow = map3;
+ 		drawboard();
+ 	}
+
+ 	// Menghitung sisa koin
+ 	function berapaKoin(){
+		map = mapNow;
+		var koen = 0;
+		for(var kolom = 0; kolom < map.length ; kolom = kolom + 1) {
+			for(var baris = 0; baris < map[kolom].length ; baris = baris + 1){
+				if(map[kolom][baris]==2){
+					koen = koen + 1;
+				}
+			}
+		}
+		return koen;
+	}
+
+ 	// ------------ function drawBoard ------------
+
+	var el = document.getElementById('board');
+	function drawboard(){
+		el.innerHTML = ''; // Reset board
+		console.log("Koin : " + berapaKoin());
+		for(var kolom = 0; kolom < map.length ; kolom = kolom + 1) {
+			for(var baris = 0; baris < map[kolom].length ; baris = baris + 1) {		
+				if (map[kolom][baris] === 1) {
+					el.innerHTML += "<div class='tembok'></div>";
+				}
+				else if (map[kolom][baris] === 2) {
+					el.innerHTML += "<div class='koin'></div>";
+				}
+				else if (map[kolom][baris] === 3) {
+					el.innerHTML += "<div class='ground'></div>";
+				}
+				else if (map[kolom][baris] === 4) {
+					el.innerHTML += "<div class='setan'></div>";
+				}
+				else if (map[kolom][baris] === 5) {
+					el.innerHTML += "<div class='pacman'></div>";
+				} 
+				else if (map[kolom][baris] === 6) {
+					el.innerHTML += "<div class='terlewati'></div>";
+				} 
+				else if (map[kolom][baris] === 7) {
+					el.innerHTML += "<div class='cabang'></div>";
+				}
+			}
+			document.getElementById("score").innerHTML = "Score anda : " + score;
+			el.innerHTML += "<br>";
+		}
+		// Pengkondisian Game Over
+		if (berapaKoin() == 0){
+			status = true;
+			alert('Game Over');
+		}
+
+	}
+	
+
+	//------------ Event Handling --------------
+
+	document.onkeydown = function(event){
+		console.log(event.keyCode);
+		// B = 66 keycode
+		// console.log(event);
+		console.log(mapNow)
+		if (event.keyCode === 37){ // Kiri
+			kiri();
+		}
+		else if (event.keyCode === 38){ // Atas
+			atas();
+		}
+		else if (event.keyCode === 39){ // Kanan
+			kanan()
+		}
+		else if (event.keyCode === 40){ // Bawah
+			bawah();
+		}
+		else if (event.keyCode === 66){ // Backtrack
+			myLoop();
+		}
+
+		// Fungsi Looping backtrack hingga semua koin terkumpul
+		// Dipakai saat tombol B ditekan
+		function myLoop() {
+			setTimeout(function() { 
+				console.log(status);
+				backtrack();
+		    	if (berapaKoin() != 0) {           
+		      		myLoop();              
+		    	}
+		  	}, 100) // milisecond
+		}
+
+		/*function myLoop(){
+			setInterval(backtrack(), 100)
+		}
+
+		function myLoop(){
+			while (berapaKoin() != 0) {
+				setInterval(backtrack(), 100)
+			}
+		}*/
+
+
+		// ----------- NOTE  -----------
+		// 1 => <div class='tembok'></div>
+		// 2 => <div class='koin'></div>
+		// 3 => <div class='ground'></div>
+		// 4 => <div class='setan'></div>
+		// 5 => <div class='pacman'></div>
+		// 6 => <div class='terlewati'></div>
+		// 7 => <div class='cabang'></div>
+		// map = [ 1, 2, 3 ] array per elemen
+
+
+		//--------- Fungsi Check pada array Map -------------
+		// Digunakan didalam fungsi-fungsi Event handling
+		function cekKiriTembok(){
+			if ( map[pacman.kolom][pacman.baris-1] !== 1) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekKananTembok(){
+			if (map[pacman.kolom][pacman.baris+1] !== 1){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekAtasTembok(){
+			if (map[pacman.kolom-1][pacman.baris] !== 1){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekBawahTembok(){
+			if (map[pacman.kolom+1][pacman.baris] !== 1){
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+		// ------------------CEK KOIN---------------------
+		function cekKiriKoin(){
+			if (map[pacman.kolom][pacman.baris-1] == 2){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		function cekKananKoin(){
+			if (map[pacman.kolom][pacman.baris+1] == 2){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekAtasKoin(){
+			if (map[pacman.kolom-1][pacman.baris] == 2){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekBawahKoin(){
+			if (map[pacman.kolom+1][pacman.baris] == 2){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// ------------------- CEK TERLEWATI ------------------
+		function cekKiriTerlewati(){
+			if (map[pacman.kolom][pacman.baris-1] == 6){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekKananTerlewati(){
+			if (map[pacman.kolom][pacman.baris+1] == 6){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekAtasTerlewati(){
+			if (map[pacman.kolom-1][pacman.baris] == 6){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekBawahTerlewati(){
+			if (map[pacman.kolom+1][pacman.baris] == 6){
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		// --------------------- CEK CABANG ---------------------
+		function cekKiriCabang(){
+			if (map[pacman.kolom][pacman.baris-1] == 7){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekKananCabang(){
+			if (map[pacman.kolom][pacman.baris+1] == 7){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekAtasCabang(){
+			if (map[pacman.kolom-1][pacman.baris] == 7){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		function cekBawahCabang(){
+			if (map[pacman.kolom+1][pacman.baris] == 7){
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		//--------- Fungsi jejak pada array Map -------------
+
+		function jejakGround(){
+			map[pacman.kolom][pacman.baris] = 3;
+		}
+
+		function jejakPacman(){
+			map[pacman.kolom][pacman.baris] = 5;
+		}
+		function jejakTerlewati(){
+			map[pacman.kolom][pacman.baris] = 6;
+		}
+		function jejakCabang(){
+			map[pacman.kolom][pacman.baris] = 7;
+		}
+
+		//---------- Fungsi Gerakan pacman dengan Panah -------------
+
+		function kiri() {
+			if ( cekKiriTembok() ) {
+				if ( cekKiriKoin()){
+					score = score + 1;
+				}
+				console.log(score);
+				jejakGround();
+				pacman.baris = pacman.baris - 1;
+				jejakPacman();
+				drawboard();
+			}
+		}
+		function kanan() {
+			if (cekKananTembok()){
+				if ( cekKananKoin()){
+					score = score + 1;
+				}
+				jejakGround();
+				pacman.baris = pacman.baris + 1;
+				jejakPacman();
+				drawboard();
+			}
+		}
+		function atas() {
+			if (cekAtasTembok()){
+				if ( cekAtasKoin()){
+					score = score + 1;
+				}
+				jejakGround();
+				pacman.kolom = pacman.kolom - 1;
+				jejakPacman();
+				drawboard();
+			}
+		}
+		function bawah() {
+			if ( cekBawahTembok()){
+				if ( cekBawahKoin()){
+					score = score + 1;
+				}
+				jejakGround();
+				pacman.kolom = pacman.kolom + 1;
+				jejakPacman();
+				drawboard();
+			}
+		}
+
+
+
+		// ---------------------------------------------- FUNGSI BACKTRACKING -------------------------------------------------
+
+		function backtrack() {
+			if ( cekKananTembok() && (!(cekKananTerlewati())) && (!(cekKananCabang()))) {
+				if ( cekKananKoin()){
+					score = score + 1;
+				}
+				jejakTerlewati();
+				pacman.baris = pacman.baris + 1;
+				jejakPacman();
+				drawboard(); 
+
+			} else if ( cekBawahTembok() && (!(cekBawahTerlewati())) && (!(cekBawahCabang()))) {
+				if (cekBawahKoin()){
+					score = score + 1;
+				}
+				jejakTerlewati();
+				pacman.kolom = pacman.kolom + 1;
+				jejakPacman();
+				drawboard();
+
+			} else if ( cekAtasTembok() && (!(cekAtasTerlewati())) && (!(cekAtasCabang()))) {
+				if ( cekAtasKoin()){
+					score = score + 1;
+				}
+				jejakTerlewati();
+				pacman.kolom = pacman.kolom - 1;
+				jejakPacman();
+				drawboard();
+			} else if ( cekKiriTembok() && (!(cekKiriTerlewati())) && (!(cekKiriCabang()))) {
+				if ( cekKiriKoin()){
+					score = score + 1;
+				}
+				jejakTerlewati();
+				pacman.baris = pacman.baris - 1;
+				jejakPacman();
+				drawboard();
+			} else { 
+				
+				// BACKTRACK JEJAK MENUJU CABANG SEBELUMNYA
+				if (cekKiriTerlewati()) {
+					jejakCabang();
+					pacman.baris = pacman.baris - 1;
+					jejakPacman();
+					drawboard();
+				} else if(cekKananTerlewati()) {
+					jejakCabang();
+					pacman.baris = pacman.baris + 1;
+					jejakPacman();
+					drawboard();
+				} else if(cekAtasTerlewati()) {
+					jejakCabang();
+					pacman.kolom = pacman.kolom - 1;
+					jejakPacman();
+					drawboard();
+				} else if(cekBawahTerlewati()) {
+					jejakCabang();
+					pacman.kolom = pacman.kolom + 1;
+					jejakPacman();
+					drawboard();
+				}
+			}
+		}
+	}
+
+</script>
+</html>
